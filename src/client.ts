@@ -1,12 +1,12 @@
-// thaw-mongodb-client-direct/src/cliient.ts
+// thaw-mongodb-client-direct/src/client.ts
 
 import { MongoClient, MongoClientOptions } from 'mongodb';
 
 import { ifDefinedThenElse } from 'thaw-common-utilities.ts';
 
-import { IMongoDBClient, IMongoDBCollection } from 'thaw-types';
+import { IMongoDBClient, IMongoDBDatabase } from 'thaw-types';
 
-import { createCollection } from './collection';
+import { createDatabase } from './database';
 
 class MongoDBClient implements IMongoDBClient {
 	private readonly mongoClient: MongoClient;
@@ -32,21 +32,22 @@ class MongoDBClient implements IMongoDBClient {
 		}
 	}
 
-	public getCollection(databaseName: string, collectionName: string): IMongoDBCollection {
+	public getDatabase(databaseName: string): IMongoDBDatabase {
 		if (this.isClientDestroyed) {
 			throw new Error('getCollection() : The connection has already been destroyed');
 		} else if (!this.isClientConnected) {
 			throw new Error('getCollection() : The client is not connected');
 		}
 
-		return createCollection(this.mongoClient, databaseName, collectionName);
+		return createDatabase(this.mongoClient, databaseName);
 	}
 }
 
-export function createDirectMongoDBClient(options: {
+export /* async */ function createDirectMongoDBClient(options: {
 	server?: string;
 	port?: number;
 	databaseName: string;
+	// connectImmediately?: boolean;
 }): IMongoDBClient {
 	const databaseUrl = `mongodb://${ifDefinedThenElse(
 		options.server,
@@ -55,4 +56,8 @@ export function createDirectMongoDBClient(options: {
 	const mongoClientOptions: MongoClientOptions = {};
 
 	return new MongoDBClient(databaseUrl, mongoClientOptions);
+
+	// Connect by default? Or create an option named connectImmediately. I.e.:
+
+	// return await new MongoDBClient(databaseUrl, mongoClientOptions).connect();
 }

@@ -5,11 +5,11 @@
 
 import {
 	Collection,
+	Db,
 	Document,
 	Filter,
 	InsertOneResult,
 	ModifyResult,
-	MongoClient,
 	ObjectId,
 	OptionalId
 } from 'mongodb';
@@ -130,10 +130,6 @@ class MongoDBCollection<TSchema extends Document = Document> implements IMongoDB
 	}
 }
 
-export function createCollection(
-	mongoClient: MongoClient,
-	databaseName: string,
-	collectionName: string
-): IMongoDBCollection {
-	return new MongoDBCollection(mongoClient.db(databaseName).collection(collectionName));
+export function createCollection(db: Db, collectionName: string): IMongoDBCollection {
+	return new MongoDBCollection(db.collection(collectionName));
 }
