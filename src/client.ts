@@ -43,16 +43,20 @@ class MongoDBClient implements IMongoDBClient {
 	}
 }
 
-export /* async */ function createDirectMongoDBClient(options: {
-	server?: string;
-	port?: number;
-	databaseName: string;
-	// connectImmediately?: boolean;
-}): IMongoDBClient {
+export /* async */ function createDirectMongoDBClient(
+	options: {
+		server?: string;
+		port?: number;
+		// databaseName: string;
+		// connectImmediately?: boolean;
+	} = {}
+): IMongoDBClient {
 	const databaseUrl = `mongodb://${ifDefinedThenElse(
 		options.server,
 		'localhost'
-	)}:${ifDefinedThenElse(options.port, 27017)}/${options.databaseName}`;
+	)}:${ifDefinedThenElse(options.port, 27017)}`;
+	// )}:${ifDefinedThenElse(options.port, 27017)}/${options.databaseName}`;
+
 	const mongoClientOptions: MongoClientOptions = {};
 
 	return new MongoDBClient(databaseUrl, mongoClientOptions);
