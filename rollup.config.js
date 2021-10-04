@@ -3,8 +3,8 @@
 /**
  * Copyright (c) Tom Weatherhead. All Rights Reserved.
  *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
+ * This source code is licensed under the MIT license found in
+ * the LICENSE file in the root directory of this source tree.
  */
 
 'use strict';
@@ -18,12 +18,14 @@ export default {
 	input: './dist/lib/main.js',
 	output: [
 		{
+			// Create a CommonJS version for Node.js
 			file: 'dist/thaw-mongodb-client-direct.cjs.js',
 			format: 'cjs',
 			exports: 'named',
 			globals: { mongodb: 'mongodb' }
 		},
 		{
+			// Create an ESModule version
 			file: 'dist/thaw-mongodb-client-direct.esm.js',
 			format: 'es',
 			esModule: true,
@@ -33,6 +35,7 @@ export default {
 		}
 		// ,
 		// { // Commented out this block. We don't want a browser version of this lib.
+		// 	// Create a version that can run in Web browsers
 		// 	file: 'dist/thaw-mongodb-client-direct.js',
 		// 	name: 'thaw-mongodb-client-direct',
 		// 	format: 'umd',

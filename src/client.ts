@@ -51,10 +51,9 @@ export /* async */ function createDirectMongoDBClient(
 		// connectImmediately?: boolean;
 	} = {}
 ): IMongoDBClient {
-	const databaseUrl = `mongodb://${ifDefinedThenElse(
-		options.server,
-		'localhost'
-	)}:${ifDefinedThenElse(options.port, 27017)}`;
+	const server = ifDefinedThenElse(options.server, 'localhost');
+	const port = ifDefinedThenElse(options.port, 27017);
+	const databaseUrl = `mongodb://${server}:${port}`;
 	// )}:${ifDefinedThenElse(options.port, 27017)}/${options.databaseName}`;
 
 	const mongoClientOptions: MongoClientOptions = {};
