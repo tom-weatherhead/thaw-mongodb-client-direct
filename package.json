@@ -1,6 +1,6 @@
 {
 	"name": "thaw-mongodb-client-direct",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "thaw-mongodb-client-direct",
 	"keywords": [
 		"MongoDB",
@@ -63,7 +63,7 @@
 	},
 	"publishConfig": {},
 	"dependencies": {
-		"mongodb": "^4.1.2",
+		"mongodb": "^4.1.3",
 		"thaw-common-utilities.ts": "^0.0.10"
 	},
 	"devDependencies": {
@@ -77,7 +77,7 @@
 		"prettier": "^2.4.1",
 		"rollup": "^2.58.0",
 		"rollup-plugin-terser": "^7.0.2",
-		"thaw-types": "^0.0.4",
+		"thaw-types": "^0.0.5",
 		"typescript": "^4.4.3",
 		"typescript-eslint-language-service": "^4.1.5"
 	},

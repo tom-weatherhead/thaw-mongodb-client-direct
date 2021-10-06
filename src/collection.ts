@@ -11,7 +11,8 @@ import {
 	InsertOneResult,
 	ModifyResult,
 	ObjectId,
-	OptionalId
+	OptionalId,
+	UpdateFilter
 } from 'mongodb';
 
 import { IMongoDBCollection } from 'thaw-types';
@@ -55,20 +56,28 @@ class MongoDBCollection<TSchema extends Document = Document> implements IMongoDB
 	}
 
 	public async readOneById(id: string): Promise<unknown> {
-		return this.collection.findOne(critter(id));
+		return await this.collection.findOne(critter(id));
 	}
 
-	public readAll(): Promise<unknown[]> {
-		return this.read({});
+	public async readAll(): Promise<unknown[]> {
+		return await this.read({});
 	}
 
-	public updateOneById(id: string, replacementData: Document): Promise<ModifyResult<Document>> {
+	// public async headOneById(id: string): Promise<unknown> {
+	// 	return await this.collection.findOne(critter(id))... and return:
+	// 	- true if found
+	// 	- false if not found?
+	// }
+
+	public async replaceOneById(
+		id: string,
+		replacementData: Document
+	): Promise<ModifyResult<Document>> {
+		// Analogous to HTTP PUT
+
 		// options: { safe?: any; remove?: boolean; upsert?: boolean; new?: boolean },
 
-		// findOneAndReplace: Analogous to HTTP PUT?
-		// findOneAndUpdate: Analogous to HTTP PATCH?
-
-		return this.collection.findOneAndReplace(
+		return await this.collection.findOneAndReplace(
 			critter(id), // query
 			replacementData, // doc
 			// { remove: false, upsert: false } // options
@@ -88,45 +97,114 @@ class MongoDBCollection<TSchema extends Document = Document> implements IMongoDB
 			}); */
 	}
 
-	public deleteOneById(id: string): Promise<boolean> {
-		// findOneAndDelete(filter: Filter<TSchema>): Promise<ModifyResult<TSchema>>;
+	public async updateOneById(
+		id: string,
+		update: UpdateFilter<Document>
+	): Promise<ModifyResult<Document>> {
+		// Analogous to HTTP PATCH
 
-		return this.collection
-			.findOneAndDelete(critter(id))
-			.then((result: ModifyResult<Document>) => {
-				console.log('deleteOneById() : result is', typeof result, result);
+		/**
+		 * Find a document and update it in one atomic operation. Requires a write lock for the duration of the operation.
+		 *
+		 * @param filter - The filter used to select the document to update
+		 * @param update - Update operations to be performed on the document
+		 * @param options - Optional settings for the command
+		 * @param callback - An optional callback, a Promise will be returned if none is provided
+		 */
+		// findOneAndUpdate(filter: Filter<TSchema>, update: UpdateFilter<TSchema>): Promise<ModifyResult<TSchema>>;
+		// findOneAndUpdate(filter: Filter<TSchema>, update: UpdateFilter<TSchema>, callback: Callback<ModifyResult<TSchema>>): void;
+		// findOneAndUpdate(filter: Filter<TSchema>, update: UpdateFilter<TSchema>, options: FindOneAndUpdateOptions): Promise<ModifyResult<TSchema>>;
+		// findOneAndUpdate(filter: Filter<TSchema>, update: UpdateFilter<TSchema>, options: FindOneAndUpdateOptions, callback: Callback<ModifyResult<TSchema>>): void;
 
-				if (result !== null) {
-					console.log('Record was found and removed.');
-				} else {
-					console.log('Record was not found.');
-				}
+		// options: { safe?: any; remove?: boolean; upsert?: boolean; new?: boolean },
 
-				return Promise.resolve(result !== null);
-			})
-			.catch((error: Error) => {
-				console.error('deleteOneById() : error is', typeof error, error);
-
-				return Promise.reject(error);
-			});
+		return await this.collection.findOneAndUpdate(
+			critter(id), // query
+			update // : UpdateFilter<TSchema>
+			// , options: FindOneAndUpdateOptions
+		);
 	}
 
-	public deleteAll(): Promise<boolean> {
-		return (
-			this.collection
-				.drop()
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				.then((result: boolean) => Promise.resolve(true))
-				.catch((error: unknown) => {
-					const errorCast = error as IDropCollectionError;
+	// public deleteOneById(id: string): Promise<boolean> {
+	// 	// findOneAndDelete(filter: Filter<TSchema>): Promise<ModifyResult<TSchema>>;
+	//
+	// 	return this.collection
+	// 		.findOneAndDelete(critter(id))
+	// 		.then((result: ModifyResult<Document>) => {
+	// 			console.log('deleteOneById() : result is', typeof result, result);
+	//
+	// 			if (result !== null) {
+	// 				console.log('Record was found and removed.');
+	// 			} else {
+	// 				console.log('Record was not found.');
+	// 			}
+	//
+	// 			return Promise.resolve(result !== null);
+	// 		})
+	// 		.catch((error: Error) => {
+	// 			console.error('deleteOneById() : error is', typeof error, error);
+	//
+	// 			return Promise.reject(error);
+	// 		});
+	// }
 
-					if (typeof errorCast === 'undefined' || errorCast.errmsg !== 'ns not found') {
-						return Promise.reject(error);
-					} else {
-						return Promise.resolve(false);
-					}
-				})
-		);
+	public async deleteOneById(id: string): Promise<boolean> {
+		// findOneAndDelete(filter: Filter<TSchema>): Promise<ModifyResult<TSchema>>;
+
+		const result = await this.collection.findOneAndDelete(critter(id));
+
+		console.log('deleteOneById() : result is', typeof result, result);
+
+		if (result !== null) {
+			console.log('Record was found and removed.');
+		} else {
+			console.log('Record was not found.');
+		}
+
+		return Promise.resolve(result !== null);
+		// })
+		// .catch((error: Error) => {
+		// 	console.error('deleteOneById() : error is', typeof error, error);
+		//
+		// 	return Promise.reject(error);
+		// });
+	}
+
+	// public deleteAll(): Promise<boolean> {
+	// 	return (
+	// 		this.collection
+	// 			.drop()
+	// 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	// 			.then((result: boolean) => Promise.resolve(true))
+	// 			.catch((error: unknown) => {
+	// 				const errorCast = error as IDropCollectionError;
+	//
+	// 				if (typeof errorCast === 'undefined' || errorCast.errmsg !== 'ns not found') {
+	// 					return Promise.reject(error);
+	// 				} else {
+	// 					return Promise.resolve(false);
+	// 				}
+	// 			})
+	// 	);
+	// }
+
+	public async deleteAll(): Promise<boolean> {
+		try {
+			const result = await this.collection.drop();
+
+			console.log('deleteAll() : result is', typeof result, result);
+
+			return Promise.resolve(true);
+		} catch (error) {
+			const errorCast = error as IDropCollectionError;
+
+			if (typeof errorCast === 'undefined' || errorCast.errmsg !== 'ns not found') {
+				return Promise.reject(error);
+			} else {
+				// The collection wasn't dropped because it didn't exist. No-op.
+				return Promise.resolve(false);
+			}
+		}
 	}
 }
 
